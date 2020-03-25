@@ -18,6 +18,8 @@ const paintingRoutes = require("./routes/painting");
 app.use(paintingRoutes);
 const paperRoutes = require("./routes/paper");
 app.use(paperRoutes);
+const contactRoutes = require("./routes/contact");
+app.use(contactRoutes);
 
 app.all("*", function(req, res) {
   res.json({ message: "all routes" });
