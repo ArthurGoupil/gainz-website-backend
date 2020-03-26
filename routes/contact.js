@@ -13,12 +13,16 @@ router.post("/contact/more-infos", (req, res) => {
     }`;
     const data = {
       from: `Gainz Art <me@${process.env.MAILGUN_DOMAIN}>`,
-      to: `arthurgoupil@gmail.com`,
+      to: email,
       subject: "Nous avons bien reçu votre demande. Message well received.",
-      text: `Bonjour${mailName},\n\nMerci de votre intérêt pour le travail de Gainz.\nNous avons bien reçu votre demande et reviendrons vers vous dans les plus brefs délais.\n\nÀ très bientôt,\nL'équipe Gainz.\n\n\nHi${mailName},\n\nThanks for your interest in Gainz work.\nWe've well received your message and will get back to you shortly.\n\nBest,\nGainz Team.`
+      html: `<img
+      src="https://apicms.thestar.com.my/uploads/images/2020/02/27/578706.jpg"
+      alt="cat"
+      style="width:200px;"
+    /><br><b>Bonjour</b>${mailName},<br><br>Merci de votre intérêt pour le travail de Gainz.<br>Nous avons bien reçu votre demande et reviendrons vers vous dans les plus brefs délais.<br><br>À très bientôt,<br>L'équipe Gainz.<br><br><br><i>Hi${mailName},<br><br>Thanks for your interest in Gainz work.<br>We've well received your message and will get back to you shortly.<br><br>Best,<br>Gainz Team.</i>`
     };
     mailgun.messages().send(data, (error, body) => {
-      res.status(200).json({ message: "body : " + body + "error : " + error });
+      res.status(200).json({ body, error });
     });
   } catch (e) {
     res.status(400).json({ error: e.message });
