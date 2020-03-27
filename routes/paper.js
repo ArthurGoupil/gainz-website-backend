@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Paper = require("../models/Paper");
 
-// Get all pa
+const isAdminAuthenticated = require("../middleware/isAdminAuthenticated");
+
+// Get all papers
 router.get("/papers", async (req, res) => {
   try {
     const paper = await Paper.find({ isDeleted: false });
@@ -24,7 +26,7 @@ router.get("/papers/:id", async (req, res) => {
 });
 
 // Add a paper
-router.post("/papers/create", async (req, res) => {
+router.post("/papers/create", isAdminAuthenticated, async (req, res) => {
   try {
     const {
       name,

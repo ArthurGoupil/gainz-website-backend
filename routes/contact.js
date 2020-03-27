@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
+const mailgun = require("mailgun-js");
 
 router.post("/contact/more-infos", (req, res) => {
-  const mailgun = require("mailgun-js")({
+  const mg = mailgun({
     apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN
+    domain: process.env.MAILGUN_DOMAIN,
+    host: "api.eu.mailgun.net"
   });
   try {
     const { lastName, name, email, tel, message } = req.fields;
@@ -21,7 +23,7 @@ router.post("/contact/more-infos", (req, res) => {
       style="width:100%;"
     /><br><b>Bonjour</b>${mailName},<br><br>Merci de votre intérêt pour le travail de Gainz.<br>Nous avons bien reçu votre demande et reviendrons vers vous dans les plus brefs délais.<br><br>À très bientôt,<br>L'équipe Gainz.<br><br><br><i>Hi${mailName},<br><br>Thanks for your interest in Gainz work.<br>We've well received your message and will get back to you shortly.<br><br>Best,<br>Gainz Team.</i>`
     };
-    mailgun.messages().send(data, (error, body) => {
+    mg.messages().send(data, (error, body) => {
       res.status(200).json({ body, error });
     });
   } catch (e) {

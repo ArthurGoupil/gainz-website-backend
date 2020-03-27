@@ -20,6 +20,8 @@ const paperRoutes = require("./routes/paper");
 app.use(paperRoutes);
 const contactRoutes = require("./routes/contact");
 app.use(contactRoutes);
+const userRoutes = require("./routes/user");
+app.use(userRoutes);
 
 app.all("*", function(req, res) {
   res.json({ message: "all routes" });
