@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Painting = require('../models/Painting');
 
+const isAdminAuthenticated = require('../middleware/isAdminAuthenticated');
+
 // Get all paintings
 router.get('/paintings', async (req, res) => {
   try {
@@ -41,7 +43,7 @@ router.get('/paintings/:id', async (req, res) => {
 });
 
 // Add a painting
-router.post('/paintings/create', async (req, res) => {
+router.post('/paintings/create', isAdminAuthenticated, async (req, res) => {
   try {
     const {
       name,
