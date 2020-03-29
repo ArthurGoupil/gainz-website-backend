@@ -1,11 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Painting = require("../models/Painting");
+const Painting = require('../models/Painting');
 
 // Get all paintings
-router.get("/paintings", async (req, res) => {
+router.get('/paintings', async (req, res) => {
   try {
-    const paintings = await Painting.find({ isDeleted: false });
+    const paintings = await Painting.find({ isDeleted: false }).sort({
+      creationYear: -1
+    });
     return res.status(200).json(paintings);
   } catch (e) {
     return res.status(400).json({ error: e.message });
@@ -13,7 +15,7 @@ router.get("/paintings", async (req, res) => {
 });
 
 // Get home paintings
-router.get("/paintings/home", async (req, res) => {
+router.get('/paintings/home', async (req, res) => {
   try {
     const paintingsSrc = [];
     const paintings = await Painting.find({ isDeleted: false, isOnHome: true });
@@ -27,7 +29,7 @@ router.get("/paintings/home", async (req, res) => {
 });
 
 // Get painting with id
-router.get("/paintings/:id", async (req, res) => {
+router.get('/paintings/:id', async (req, res) => {
   const id = req.params.id;
   try {
     const painting = await Painting.findById(id);
@@ -38,7 +40,7 @@ router.get("/paintings/:id", async (req, res) => {
 });
 
 // Add a painting
-router.post("/paintings/create", async (req, res) => {
+router.post('/paintings/create', async (req, res) => {
   try {
     const {
       name,

@@ -1,13 +1,15 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Paper = require("../models/Paper");
+const Paper = require('../models/Paper');
 
-const isAdminAuthenticated = require("../middleware/isAdminAuthenticated");
+const isAdminAuthenticated = require('../middleware/isAdminAuthenticated');
 
 // Get all papers
-router.get("/papers", async (req, res) => {
+router.get('/papers', async (req, res) => {
   try {
-    const paper = await Paper.find({ isDeleted: false });
+    const paper = await Paper.find({ isDeleted: false }).sort({
+      creationYear: -1
+    });
     return res.status(200).json(paper);
   } catch (e) {
     return res.status(400).json({ error: e.message });
@@ -15,7 +17,7 @@ router.get("/papers", async (req, res) => {
 });
 
 // Get paper with id
-router.get("/papers/:id", async (req, res) => {
+router.get('/papers/:id', async (req, res) => {
   const id = req.params.id;
   try {
     const paper = await Paper.findById(id);
@@ -26,7 +28,7 @@ router.get("/papers/:id", async (req, res) => {
 });
 
 // Add a paper
-router.post("/papers/create", isAdminAuthenticated, async (req, res) => {
+router.post('/papers/create', isAdminAuthenticated, async (req, res) => {
   try {
     const {
       name,
