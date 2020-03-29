@@ -6,7 +6,8 @@ const Painting = require('../models/Painting');
 router.get('/paintings', async (req, res) => {
   try {
     const paintings = await Painting.find({ isDeleted: false }).sort({
-      creationYear: -1
+      creationYear: -1,
+      name: 1
     });
     return res.status(200).json(paintings);
   } catch (e) {

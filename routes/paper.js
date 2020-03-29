@@ -8,7 +8,8 @@ const isAdminAuthenticated = require('../middleware/isAdminAuthenticated');
 router.get('/papers', async (req, res) => {
   try {
     const paper = await Paper.find({ isDeleted: false }).sort({
-      creationYear: -1
+      creationYear: -1,
+      name: 1
     });
     return res.status(200).json(paper);
   } catch (e) {
