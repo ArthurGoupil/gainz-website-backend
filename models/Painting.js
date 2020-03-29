@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const Painting = mongoose.model("Painting", {
+const Painting = mongoose.model('Painting', {
   name: {
     type: String,
     required: true,
@@ -13,12 +13,12 @@ const Painting = mongoose.model("Painting", {
   format: {
     type: String,
     required: true,
-    default: "normal",
-    enum: ["normal", "diptyque", "triptyque"]
+    default: 'normal',
+    enum: ['normal', 'diptyque', 'triptyque']
   },
   details: {
     type: String,
-    default: ""
+    default: ''
   },
   width: {
     type: Number,
@@ -43,6 +43,10 @@ const Painting = mongoose.model("Painting", {
   },
   creationYear: {
     type: Number,
+    required: true
+  },
+  previewImage: {
+    type: String,
     required: true
   },
   smallImage: {
