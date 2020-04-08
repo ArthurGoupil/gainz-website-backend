@@ -9,7 +9,7 @@ router.get('/paintings', async (req, res) => {
   try {
     const paintings = await Painting.find({ isDeleted: false }).sort({
       creationYear: -1,
-      name: 1
+      name: 1,
     });
     return res.status(200).json(paintings);
   } catch (e) {
@@ -22,7 +22,7 @@ router.get('/paintings/home', async (req, res) => {
   try {
     const paintingsSrc = [];
     const paintings = await Painting.find({ isDeleted: false, isOnHome: true });
-    paintings.forEach(painting => {
+    paintings.forEach((painting) => {
       paintingsSrc.push(painting.smallImage);
     });
     return res.status(200).json(paintingsSrc);
@@ -64,7 +64,7 @@ router.post('/paintings/create', isAdminAuthenticated, async (req, res) => {
       sellPrice,
       customer,
       creationYear,
-      isOnHome
+      isOnHome,
     } = req.fields;
     const painting = new Painting({
       name,
@@ -85,7 +85,7 @@ router.post('/paintings/create', isAdminAuthenticated, async (req, res) => {
       sellPrice,
       customer,
       creationYear,
-      isOnHome
+      isOnHome,
     });
     await painting.save();
     return res

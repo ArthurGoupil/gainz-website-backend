@@ -9,7 +9,7 @@ router.get('/papers', async (req, res) => {
   try {
     const paper = await Paper.find({ isDeleted: false }).sort({
       creationYear: -1,
-      name: 1
+      name: 1,
     });
     return res.status(200).json(paper);
   } catch (e) {
@@ -49,7 +49,7 @@ router.post('/papers/create', isAdminAuthenticated, async (req, res) => {
       isSold,
       sellPrice,
       customer,
-      creationYear
+      creationYear,
     } = req.fields;
     const paper = new Paper({
       name,
@@ -69,7 +69,7 @@ router.post('/papers/create', isAdminAuthenticated, async (req, res) => {
       isSold,
       sellPrice,
       customer,
-      creationYear
+      creationYear,
     });
     await paper.save();
     return res

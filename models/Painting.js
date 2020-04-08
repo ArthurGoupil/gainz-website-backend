@@ -4,83 +4,83 @@ const Painting = mongoose.model('Painting', {
   name: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   type: {
     type: String,
-    required: true
+    required: true,
   },
   format: {
     type: String,
     required: true,
     default: 'normal',
-    enum: ['normal', 'diptyque', 'triptyque']
+    enum: ['normal', 'diptyque', 'triptyque'],
   },
   details: {
     type: String,
-    default: ''
+    default: '',
   },
   width: {
     type: Number,
-    required: true
+    required: true,
   },
   widthOfEach: {
-    type: Number
+    type: Number,
   },
   height: {
     type: Number,
-    required: true
+    required: true,
   },
   heightOfEach: {
-    type: Number
+    type: Number,
   },
   price: {
-    type: Number
+    type: Number,
   },
   addDate: {
     type: Date,
-    default: new Date()
+    default: new Date(),
   },
   creationYear: {
     type: Number,
-    required: true
+    required: true,
   },
   previewImage: {
     type: String,
-    required: true
+    required: true,
   },
   smallImage: {
     type: String,
-    required: true
+    required: true,
   },
   bigImage: {
     type: String,
-    required: true
+    required: true,
   },
   scndBigImage: {
-    type: String
+    type: String,
   },
   thrdBigImage: {
-    type: String
+    type: String,
   },
   isSold: {
     type: Boolean,
-    default: false
+    default: false,
   },
   sellPrice: {
-    type: Number
+    type: Number,
   },
   customer: {
-    type: String
+    type: String,
   },
   isOnHome: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isDeleted: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 module.exports = Painting;
