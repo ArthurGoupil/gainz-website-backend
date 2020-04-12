@@ -23,7 +23,10 @@ router.get('/paintings/home', async (req, res) => {
     const paintingsSrc = [];
     const paintings = await Painting.find({ isDeleted: false, isOnHome: true });
     paintings.forEach((painting) => {
-      paintingsSrc.push(painting.smallImage);
+      paintingsSrc.push({
+        smallImage: painting.smallImage,
+        previewImage: painting.previewImage,
+      });
     });
     return res.status(200).json(paintingsSrc);
   } catch (e) {
