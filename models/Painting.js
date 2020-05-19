@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const Painting = mongoose.model('Painting', {
+  shortId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,

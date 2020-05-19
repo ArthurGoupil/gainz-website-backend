@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const Paper = mongoose.model('Paper', {
+  shortId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,

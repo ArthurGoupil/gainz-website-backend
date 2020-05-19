@@ -14,6 +14,7 @@
     "express-formidable": "^1.2.0",
     "mailgun-js": "^0.22.0",
     "mongoose": "^5.9.5",
+    "shortid": "^2.2.15",
     "uid2": "^0.0.3"
   }
 }
