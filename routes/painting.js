@@ -5,6 +5,13 @@ const Painting = require('../models/Painting');
 
 const isAdminAuthenticated = require('../middleware/isAdminAuthenticated');
 
+const cloudinary = require('cloudinary');
+cloudinary.config({
+  cloud_name: 'goupil',
+  api_key: '654369122393577',
+  api_secret: 'kJffNbslYOF7UCnOo24giZYZSE8',
+});
+
 shortid.characters(
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@'
 );
@@ -29,6 +36,7 @@ shortid.characters(
 router.get('/paintings', async (req, res) => {
   try {
     const paintings = await Painting.find({ isDeleted: false }).sort({
+      isSold: 1,
       creationYear: -1,
       name: 1,
     });
@@ -66,51 +74,83 @@ router.get('/paintings/:shortId', async (req, res) => {
   }
 });
 
+router.post('/paintings/add', isAdminAuthenticated, (req, res) => {
+  const filesResults = [];
+  const files = [];
+  const artPart = ['first-part', 'second-part', 'third-part'];
+
+  if (req.files.firstImage) files.push(req.files.firstImage);
+  if (req.files.secondImage) files.push(req.files.secondImage);
+  if (req.files.thirdImage) files.push(req.files.thirdImage);
+
+  try {
+    if (typeof files === 'object') {
+      if (files.length > 1) {
+        files.forEach((file, index) => {
+          cloudinary.v2.uploader.upload(
+            file.path,
+            {
+              folder: 'gainz/paintings',
+              public_id: `${file.name.slice(
+                0,
+                file.name.lastIndexOf('.')
+              )}_${shortid.generate()}`,
+              tags: [artPart[index]],
+            },
+            (error, result) => {
+              if (error) {
+                return res.status(400).json({ error });
+              } else {
+                filesResults.push({
+                  path: `${result.public_id}.${result.format}`,
+                  ratio: result.height / result.width,
+                  height: (result.width * result.height) / result.width,
+                  result,
+                });
+              }
+              if (filesResults.length === files.length) {
+                return res.status(200).json(filesResults);
+              }
+            }
+          );
+        });
+      } else {
+        cloudinary.v2.uploader.upload(
+          files[0].path,
+          {
+            folder: 'gainz/paintings',
+            public_id: `${files[0].name.slice(
+              0,
+              files[0].name.lastIndexOf('.')
+            )}_${shortid.generate()}`,
+          },
+          (error, result) => {
+            if (error) {
+              return res.status(400).json({ error });
+            } else {
+              filesResults.push({
+                path: `${result.public_id}.${result.format}`,
+                ratio: result.height / result.width,
+                height: (result.width * result.height) / result.width,
+              });
+            }
+
+            return res.status(200).json(filesResults);
+          }
+        );
+      }
+    }
+  } catch (e) {
+    return res.status(400).json({ error: e.message });
+  }
+});
+
 // Add a painting
 router.post('/paintings/create', isAdminAuthenticated, async (req, res) => {
   try {
-    const {
-      name,
-      type,
-      format,
-      details,
-      width,
-      widthOfEach,
-      height,
-      heightOfEach,
-      price,
-      previewImage,
-      smallImage,
-      bigImage,
-      scndBigImage,
-      thrdBigImage,
-      isSold,
-      sellPrice,
-      customer,
-      creationYear,
-      isOnHome,
-    } = req.fields;
     const painting = new Painting({
       shortId: shortid.generate(),
-      name,
-      type,
-      format,
-      details,
-      width,
-      widthOfEach,
-      height,
-      heightOfEach,
-      price,
-      previewImage,
-      smallImage,
-      scndBigImage,
-      thrdBigImage,
-      bigImage,
-      isSold,
-      sellPrice,
-      customer,
-      creationYear,
-      isOnHome,
+      ...req.fields,
     });
     await painting.save();
     return res

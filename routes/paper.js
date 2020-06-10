@@ -29,6 +29,7 @@ shortid.characters(
 router.get('/papers', async (req, res) => {
   try {
     const paper = await Paper.find({ isDeleted: false }).sort({
+      isSold: 1,
       creationYear: -1,
       name: 1,
     });
