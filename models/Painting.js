@@ -41,6 +41,7 @@ const Painting = mongoose.model('Painting', {
   },
   price: {
     type: Number,
+    required: true,
   },
   addDate: {
     type: Date,
