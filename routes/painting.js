@@ -74,15 +74,54 @@ router.get('/paintings/:shortId', async (req, res) => {
   }
 });
 
-router.post('/paintings/add', isAdminAuthenticated, (req, res) => {
+router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
   const filesResults = [];
   const files = [];
-  const artPart = ['first-part', 'second-part', 'third-part'];
+  const paintPart = ['first-part', 'second-part', 'third-part'];
+  const paintData = {};
 
-  if (req.files.firstImage) files.push(req.files.firstImage);
-  if (req.files.secondImage) files.push(req.files.secondImage);
-  if (req.files.thirdImage) files.push(req.files.thirdImage);
+  const { firstImage, secondImage, thirdImage } = req.files;
 
+  const { name, type, format, customer } = req.fields;
+
+  const creationYear = JSON.parse(req.fields.creationYear);
+  const width = JSON.parse(req.fields.width);
+  const height = JSON.parse(req.fields.height);
+  const price = JSON.parse(req.fields.price);
+  const isSold = JSON.parse(req.fields.isSold);
+  const sellPrice = JSON.parse(req.fields.sellPrice);
+  const sellPriceIsUnknown = JSON.parse(req.fields.sellPriceIsUnknown);
+
+  if (firstImage) files.push(firstImage);
+  if (secondImage) files.push(secondImage);
+  if (thirdImage) files.push(thirdImage);
+
+  const addArtToDataBase = () => {
+    // Building data for request
+    paintData.name = name;
+    paintData.creationYear = creationYear;
+    paintData.format = format;
+    paintData.type = type;
+    if (format === 'triptyque') {
+      paintData.width = width * 3 + 4;
+    } else if (format === 'diptyque') {
+      paintData.width = paintData.width = width * 2 + 2;
+    } else paintData.width = width;
+    paintData.height = height;
+    if (format !== 'normal') {
+      paintData.widthOfEach = width;
+      paintData.heightOfEach = height;
+    }
+    paintData.price = price;
+    paintData.isSold = isSold;
+    if (isSold) {
+      paintData.customer = customer;
+      if (sellPriceIsUnknown) paintData.sellPrice = null;
+      else paintData.sellPrice = sellPrice;
+    }
+  };
+
+  // Uploading picture(s)
   try {
     if (typeof files === 'object') {
       if (files.length > 1) {
@@ -95,7 +134,7 @@ router.post('/paintings/add', isAdminAuthenticated, (req, res) => {
                 0,
                 file.name.lastIndexOf('.')
               )}_${shortid.generate()}`,
-              tags: [artPart[index]],
+              tags: [paintPart[index]],
             },
             (error, result) => {
               if (error) {
@@ -105,11 +144,11 @@ router.post('/paintings/add', isAdminAuthenticated, (req, res) => {
                   path: `${result.public_id}.${result.format}`,
                   ratio: result.height / result.width,
                   height: (result.width * result.height) / result.width,
-                  result,
                 });
               }
               if (filesResults.length === files.length) {
-                return res.status(200).json(filesResults);
+                addArtToDataBase();
+                return res.status(200).json({ paintData, filesResults });
               }
             }
           );
@@ -133,9 +172,9 @@ router.post('/paintings/add', isAdminAuthenticated, (req, res) => {
                 ratio: result.height / result.width,
                 height: (result.width * result.height) / result.width,
               });
+              addArtToDataBase();
+              return res.status(200).json({ paintData, filesResults });
             }
-
-            return res.status(200).json(filesResults);
           }
         );
       }
@@ -143,6 +182,20 @@ router.post('/paintings/add', isAdminAuthenticated, (req, res) => {
   } catch (e) {
     return res.status(400).json({ error: e.message });
   }
+
+  // Adding paint to DB
+  // try {
+  //   const painting = new Painting({
+  //     shortId: shortid.generate(),
+  //     ...req.fields,
+  //   });
+  //   await painting.save();
+  //   return res
+  //     .status(200)
+  //     .json({ message: `Painting '${painting.name}' has been created.` });
+  // } catch (e) {
+  //   return res.status(400).json({ error: e.message });
+  // }
 });
 
 // Add a painting
