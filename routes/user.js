@@ -2,11 +2,14 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
+const isAdminAuthenticated = require('../middleware/isAdminAuthenticated');
+
 const SHA256 = require('crypto-js/sha256');
 const encBase64 = require('crypto-js/enc-base64');
 const uid2 = require('uid2');
 
-router.post('/users/signup', async (req, res) => {
+// Add user to database
+router.post('/users/signup', isAdminAuthenticated, async (req, res) => {
   try {
     const { email, password } = req.fields;
     const token = uid2(64);
@@ -32,6 +35,7 @@ router.post('/users/signup', async (req, res) => {
   }
 });
 
+// Signin to backoffice
 router.post('/users/signin', async (req, res) => {
   const { email, password } = req.fields;
   try {

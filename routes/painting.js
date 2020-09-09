@@ -74,6 +74,7 @@ router.get('/paintings/:shortId', async (req, res) => {
   }
 });
 
+// Add a paint to DB & upload paint picture(s) to Cloudinary
 router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
   const filesResults = [];
   const files = [];
@@ -96,7 +97,7 @@ router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
   if (secondImage) files.push(secondImage);
   if (thirdImage) files.push(thirdImage);
 
-  const addArtToDataBase = () => {
+  const addArtToDataBase = async (files) => {
     // Building data for request
     paintData.name = name;
     paintData.creationYear = creationYear;
@@ -118,6 +119,119 @@ router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
       paintData.customer = customer;
       if (sellPriceIsUnknown) paintData.sellPrice = null;
       else paintData.sellPrice = sellPrice;
+    }
+
+    // Building imgs URLs
+    const getCloudinaryUrl = (files, size, format) => {
+      const firstPart = files.find(
+        (file) => file.part === 'only-part' || file.part === 'first-part'
+      );
+      const secondPart = files.find((file) => file.part === 'second-part');
+      const thirdPart = files.find((file) => file.part === 'third-part');
+      let url;
+      switch (size) {
+        case 'preview':
+          const previewHeight = Math.round(50 * firstPart.ratio);
+          switch (format) {
+            case 'normal':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-preview/${firstPart.path}`;
+              break;
+            case 'diptyque':
+              url = `https://res.cloudinary.com/goupil/image/upload/c_scale,h_${previewHeight},w_102/c_scale,g_west,l_${firstPart.transformationsPath},w_50,h_${previewHeight}/c_scale,g_east,l_${secondPart.transformationsPath},w_50,h_${previewHeight}/gainz/format-background_hjr0dn.png`;
+              break;
+            case 'triptyque':
+              url = `https://res.cloudinary.com/goupil/image/upload/c_scale,h_${previewHeight},w_153/c_scale,g_west,l_${firstPart.transformationsPath},w_50,h_${previewHeight}/c_scale,l_${secondPart.transformationsPath},w_50,h_${previewHeight}/c_scale,g_east,l_${thirdPart.transformationsPath},w_50,h_${previewHeight}/gainz/format-background_hjr0dn.png`;
+              break;
+            default:
+              console.log('Wrong format provided');
+          }
+          break;
+        case 'small':
+          const smallHeight = Math.round(500 * firstPart.ratio);
+          switch (format) {
+            case 'normal':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-small/${firstPart.path}`;
+              break;
+            case 'diptyque':
+              url = `https://res.cloudinary.com/goupil/image/upload/c_scale,h_${smallHeight},w_1015/c_scale,g_west,l_${firstPart.transformationsPath},w_500,h_${smallHeight}/c_scale,g_east,l_${secondPart.transformationsPath},w_500,h_${smallHeight}/gainz/format-background_snazfq.jpg`;
+              break;
+            case 'triptyque':
+              url = `https://res.cloudinary.com/goupil/image/upload/c_scale,h_${smallHeight},w_1530/c_scale,g_west,l_${firstPart.transformationsPath},w_500,h_${smallHeight}/c_scale,l_${secondPart.transformationsPath},w_500,h_${smallHeight}/c_scale,g_east,l_${thirdPart.transformationsPath},w_500,h_${smallHeight}/gainz/format-background_hjr0dn.png`;
+              break;
+            default:
+              console.log('Wrong format provided');
+          }
+          break;
+        case 'big':
+          switch (format) {
+            case 'normal':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-big/${firstPart.path}`;
+              break;
+            case 'diptyque-first':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-big/${firstPart.path}`;
+              break;
+            case 'diptyque-second':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-big/${secondPart.path}`;
+              break;
+            case 'triptyque-first':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-big/${firstPart.path}`;
+              break;
+            case 'triptyque-second':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-big/${secondPart.path}`;
+              break;
+            case 'triptyque-third':
+              url = `https://res.cloudinary.com/goupil/image/upload/t_gainz-big/${thirdPart.path}`;
+              break;
+            default:
+              console.log('Wrong format provided');
+          }
+          break;
+        default:
+          console.log('Wrong size provided');
+      }
+      return url;
+    };
+
+    if (format === 'normal') {
+      paintData.previewImage = getCloudinaryUrl(files, 'preview', 'normal');
+      paintData.smallImage = getCloudinaryUrl(files, 'small', 'normal');
+      paintData.bigImage = getCloudinaryUrl(files, 'big', 'normal');
+    } else if (format === 'diptyque') {
+      paintData.previewImage = getCloudinaryUrl(files, 'preview', 'diptyque');
+      paintData.smallImage = getCloudinaryUrl(files, 'small', 'diptyque');
+      paintData.bigImage = getCloudinaryUrl(files, 'big', 'diptyque-first');
+      paintData.scndBigImage = getCloudinaryUrl(
+        files,
+        'big',
+        'diptyque-second'
+      );
+    } else if (format === 'triptyque') {
+      paintData.previewImage = getCloudinaryUrl(files, 'preview', 'triptyque');
+      paintData.smallImage = getCloudinaryUrl(files, 'small', 'triptyque');
+      paintData.bigImage = getCloudinaryUrl(files, 'big', 'triptyque-first');
+      paintData.scndBigImage = getCloudinaryUrl(
+        files,
+        'big',
+        'triptyque-second'
+      );
+      paintData.thrdBigImage = getCloudinaryUrl(
+        files,
+        'big',
+        'triptyque-third'
+      );
+    } else console.log('Wrong format provided');
+
+    try {
+      const painting = new Painting({
+        ...paintData,
+      });
+      await painting.save();
+      return res.status(200).json({
+        message: `Painting '${painting.name}' has been created.`,
+        data: painting,
+      });
+    } catch (e) {
+      return res.status(400).json({ error: e.message });
     }
   };
 
@@ -142,13 +256,17 @@ router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
               } else {
                 filesResults.push({
                   path: `${result.public_id}.${result.format}`,
+                  transformationsPath: `${result.public_id.replace(
+                    /\//g,
+                    ':'
+                  )}`,
                   ratio: result.height / result.width,
                   height: (result.width * result.height) / result.width,
+                  part: result.tags[0],
                 });
               }
               if (filesResults.length === files.length) {
-                addArtToDataBase();
-                return res.status(200).json({ paintData, filesResults });
+                addArtToDataBase(filesResults);
               }
             }
           );
@@ -162,6 +280,7 @@ router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
               0,
               files[0].name.lastIndexOf('.')
             )}_${shortid.generate()}`,
+            tags: 'only-part',
           },
           (error, result) => {
             if (error) {
@@ -171,44 +290,14 @@ router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
                 path: `${result.public_id}.${result.format}`,
                 ratio: result.height / result.width,
                 height: (result.width * result.height) / result.width,
+                part: result.tags[0],
               });
-              addArtToDataBase();
-              return res.status(200).json({ paintData, filesResults });
+              addArtToDataBase(filesResults);
             }
           }
         );
       }
     }
-  } catch (e) {
-    return res.status(400).json({ error: e.message });
-  }
-
-  // Adding paint to DB
-  // try {
-  //   const painting = new Painting({
-  //     shortId: shortid.generate(),
-  //     ...req.fields,
-  //   });
-  //   await painting.save();
-  //   return res
-  //     .status(200)
-  //     .json({ message: `Painting '${painting.name}' has been created.` });
-  // } catch (e) {
-  //   return res.status(400).json({ error: e.message });
-  // }
-});
-
-// Add a painting
-router.post('/paintings/create', isAdminAuthenticated, async (req, res) => {
-  try {
-    const painting = new Painting({
-      shortId: shortid.generate(),
-      ...req.fields,
-    });
-    await painting.save();
-    return res
-      .status(200)
-      .json({ message: `Painting '${painting.name}' has been created.` });
   } catch (e) {
     return res.status(400).json({ error: e.message });
   }

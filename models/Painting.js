@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
+const shortid = require('shortid');
+
+shortid.characters(
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@'
+);
 
 const Painting = mongoose.model('Painting', {
   shortId: {
     type: String,
     required: true,
     unique: true,
+    default: shortid.generate,
   },
   name: {
     type: String,
@@ -45,7 +51,7 @@ const Painting = mongoose.model('Painting', {
   },
   addDate: {
     type: Date,
-    default: new Date(),
+    default: Date.now,
   },
   creationYear: {
     type: Number,
