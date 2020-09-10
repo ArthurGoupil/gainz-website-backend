@@ -29,7 +29,6 @@ const Painting = mongoose.model('Painting', {
   },
   details: {
     type: String,
-    default: '',
   },
   width: {
     type: Number,

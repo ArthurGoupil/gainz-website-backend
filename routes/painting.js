@@ -74,7 +74,7 @@ router.get('/paintings/:shortId', async (req, res) => {
   }
 });
 
-// Add a paint to DB & upload paint picture(s) to Cloudinary
+// Add a painting to DB & upload painting picture(s) to Cloudinary
 router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
   const filesResults = [];
   const files = [];
@@ -225,10 +225,21 @@ router.post('/paintings/add', isAdminAuthenticated, async (req, res) => {
       const painting = new Painting({
         ...paintData,
       });
-      await painting.save();
-      return res.status(200).json({
-        message: `Painting '${painting.name}' has been created.`,
-        data: painting,
+      await painting.save((error) => {
+        if (error) {
+          // Duplicate paper name
+          if (error.name === 'MongoError' && error.code === 11000) {
+            return res
+              .status(422)
+              .json({ message: 'painting already exists!' });
+          }
+          // Some other error
+          return res.status(422).json(error);
+        } else
+          return res.status(200).json({
+            message: `Painting '${painting.name}' has been created.`,
+            data: painting,
+          });
       });
     } catch (e) {
       return res.status(400).json({ error: e.message });

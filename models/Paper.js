@@ -29,7 +29,6 @@ const Paper = mongoose.model('Paper', {
   },
   details: {
     type: String,
-    default: '',
   },
   width: {
     type: Number,
